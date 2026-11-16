@@ -1,0 +1,16 @@
+[package]
+name = "bare-bundle-compress"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["staticlib"]
+path = "src/lib.rs"
+
+[dependencies]
+oxc = { version = "0.158.0", features = ["semantic", "minifier", "codegen", "transformer"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
