@@ -31,7 +31,7 @@ jobs:
             arch: arm64
             target: aarch64-pc-windows-msvc
     runs-on: ${{ matrix.os }}
-    name: Build / ${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.tags }}
+    name: Build / ${{ matrix.platform }}-${{ matrix.arch }}
     steps:
       - uses: holepunchto/actions/bare-base@v1
       - uses: holepunchto/actions/setup-rust@v1
@@ -42,7 +42,6 @@ jobs:
           platform: ${{ matrix.platform }}
           arch: ${{ matrix.arch }}
           flags: ${{ matrix.flags }}
-          tags: ${{ matrix.tags}}
           upload: true
   publish:
     runs-on: ubuntu-latest
