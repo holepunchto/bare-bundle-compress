@@ -1,6 +1,6 @@
 {
   "name": "bare-bundle-compress",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Minify the modules of a Bare bundle",
   "exports": {
     "./package": "./package.json",
