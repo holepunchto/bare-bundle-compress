@@ -113,6 +113,23 @@ test('recorded types decide how files are compressed', (t) => {
   t.snapshot(Object.fromEntries([...compressed.keys()].map((key) => [key, compressed.type(key)])))
 })
 
+test('compressing never introduces syntax newer than the target', (t) => {
+  const bundle = new Bundle().write(
+    '/main.js',
+    'module.exports = (a, b) => (a === null || a === undefined ? b : a)',
+    { main: true }
+  )
+
+  t.ok(compress(bundle).read('/main.js').toString().includes('??'))
+  t.absent(compress(bundle, { target: 'es2019' }).read('/main.js').toString().includes('??'))
+})
+
+test('unknown targets are rejected', (t) => {
+  const bundle = new Bundle().write('/main.js', 'module.exports = 1', { main: true })
+
+  t.exception.all(() => compress(bundle, { target: 'es5' }), /Unknown target 'es5'/)
+})
+
 test('syntax errors report the module and position', (t) => {
   const bundle = new Bundle()
     .write('/main.js', 'module.exports = 1', { main: true })

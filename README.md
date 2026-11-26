@@ -20,6 +20,8 @@ compress(bundle).read('/main.js').toString()
 // 'module.exports=42;'
 ```
 
+The compressed modules use the newest syntax that makes them smaller, such as `??` in place of a comparison with `null`. To run them on an engine without it, set `target` to the newest ECMAScript version that the engine supports, from `'es2015'` to `'esnext'`, the default. Syntax that the modules already use is left as it is, so lower it first with <https://github.com/holepunchto/bare-bundle-lower>.
+
 ## License
 
 Apache-2.0
