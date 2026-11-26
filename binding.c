@@ -28,6 +28,7 @@ typedef struct {
 
 typedef struct {
   uint32_t flags;
+  bare_bundle_compress_string_t target;
   const bare_bundle_compress_define_t *defines;
   size_t defines_len;
 } bare_bundle_compress_options_t;
@@ -217,8 +218,8 @@ static js_value_t *
 bare_bundle_compress_compress(js_env_t *env, js_callback_info_t *info) {
   int err;
 
-  size_t argc = 5;
-  js_value_t *argv[5];
+  size_t argc = 6;
+  js_value_t *argv[6];
 
   err = js_get_callback_info(env, info, &argc, argv, NULL, NULL);
   assert(err == 0);
@@ -280,10 +281,20 @@ bare_bundle_compress_compress(js_env_t *env, js_callback_info_t *info) {
     return NULL;
   }
 
+  bare_bundle_compress_string_t target;
+  if (bare_bundle_compress__get_string(env, argv[4], &target) < 0) {
+    err = js_throw_type_error(env, NULL, "Target must be a string");
+    assert(err == 0);
+
+    return NULL;
+  }
+
   bare_bundle_compress_define_t *defines;
   size_t defines_len;
 
-  if (bare_bundle_compress__get_defines(env, argv[4], &defines, &defines_len) < 0) {
+  if (bare_bundle_compress__get_defines(env, argv[5], &defines, &defines_len) < 0) {
+    free((void *) target.data);
+
     err = js_throw_type_error(env, NULL, "Defines must be an array of string pairs");
     assert(err == 0);
 
@@ -300,6 +311,7 @@ bare_bundle_compress_compress(js_env_t *env, js_callback_info_t *info) {
     copy = malloc((size_t) len);
 
     if (copy == NULL) {
+      free((void *) target.data);
       bare_bundle_compress__free_defines(defines, defines_len);
 
       err = js_throw_error(env, NULL, "Out of memory");
@@ -315,6 +327,7 @@ bare_bundle_compress_compress(js_env_t *env, js_callback_info_t *info) {
 
   bare_bundle_compress_options_t options = {
     .flags = (uint32_t) flags,
+    .target = target,
     .defines = defines,
     .defines_len = defines_len,
   };
@@ -324,6 +337,7 @@ bare_bundle_compress_compress(js_env_t *env, js_callback_info_t *info) {
 
   free(copy);
 
+  free((void *) target.data);
   bare_bundle_compress__free_defines(defines, defines_len);
 
   js_value_t *output;

@@ -22,6 +22,7 @@ pub struct bare_bundle_compress_define_t {
 #[repr(C)]
 pub struct bare_bundle_compress_options_t {
     flags: u32,
+    target: bare_bundle_compress_string_t,
     defines: *const bare_bundle_compress_define_t,
     defines_len: usize,
 }
@@ -65,6 +66,7 @@ pub unsafe extern "C" fn bare_bundle_compress(
 
         let options = Options {
             flags: options.flags,
+            target: to_string(&options.target),
             defines: slice_or_empty(options.defines, options.defines_len)
                 .iter()
                 .map(|define| (to_string(&define.key), to_string(&define.value)))

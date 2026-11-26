@@ -1,6 +1,20 @@
 const Bundle = require('bare-bundle')
 const binding = require('#binding')
 
+const targets = new Set([
+  'es2015',
+  'es2016',
+  'es2017',
+  'es2018',
+  'es2019',
+  'es2020',
+  'es2021',
+  'es2022',
+  'es2023',
+  'es2024',
+  'esnext'
+])
+
 module.exports = function compress(bundle, opts = {}) {
   const {
     whitespace = true,
@@ -8,8 +22,11 @@ module.exports = function compress(bundle, opts = {}) {
     mangle = true,
     compress = true,
     keepNames = true,
+    target = 'esnext',
     defines = {}
   } = opts
+
+  if (!targets.has(target)) throw new TypeError(`Unknown target '${target}'`)
 
   if (!Bundle.isBundle(bundle)) bundle = Bundle.from(bundle)
 
@@ -27,7 +44,14 @@ module.exports = function compress(bundle, opts = {}) {
 
   const input = bundle.toBuffer()
 
-  const result = binding.compress(input.buffer, input.byteOffset, input.byteLength, flags, pairs)
+  const result = binding.compress(
+    input.buffer,
+    input.byteOffset,
+    input.byteLength,
+    flags,
+    target,
+    pairs
+  )
 
   if (result.diagnostics) throw createError(bundle, result.diagnostics)
 

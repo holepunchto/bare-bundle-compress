@@ -8,6 +8,7 @@ use oxc::minifier::{
 use oxc::parser::{ParseOptions, Parser};
 use oxc::semantic::SemanticBuilder;
 use oxc::span::SourceType;
+use oxc::transformer::EngineTargets;
 use oxc::transformer_plugins::{ReplaceGlobalDefines, ReplaceGlobalDefinesConfig};
 
 use crate::bundle::{Bundle, Data};
@@ -20,11 +21,13 @@ pub const KEEP_NAMES: u32 = 1 << 4;
 
 pub struct Options {
     pub flags: u32,
+    pub target: String,
     pub defines: Vec<(String, String)>,
 }
 
 struct Pipeline {
     flags: u32,
+    target: EngineTargets,
     defines: Option<ReplaceGlobalDefinesConfig>,
 }
 
@@ -43,8 +46,16 @@ impl Pipeline {
             Some(config)
         };
 
+        let target = EngineTargets::from_target(&options.target).map_err(|_| {
+            vec![Diagnostic::new(
+                "",
+                format!("Unknown target '{}'", options.target),
+            )]
+        })?;
+
         Ok(Pipeline {
             flags: options.flags,
+            target,
             defines,
         })
     }
@@ -215,6 +226,7 @@ fn compress_module(
     };
 
     let compress = CompressOptions {
+        target: pipeline.target.clone(),
         keep_names: CompressOptionsKeepNames {
             function: keep_names,
             class: keep_names,
